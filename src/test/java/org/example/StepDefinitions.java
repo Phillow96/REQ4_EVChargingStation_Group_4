@@ -1,8 +1,9 @@
 package org.example;
-
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 class StepDefinitions {
 
