@@ -3,15 +3,15 @@ package org.example;
 public class Customer {
 
     private String name;
-    private Double balance;
+    private final PrepaidAccount prepaidAccount;
 
     public Customer(String name){
         this.name = name;
-        this.balance = 0.0;
+        this.prepaidAccount = new PrepaidAccount();
     }
 
-    public double getBalance(){
-        return this.balance;
+    public PrepaidAccount getPrepaidAccount(){
+        return this.prepaidAccount;
     }
 
     public String getName(){
