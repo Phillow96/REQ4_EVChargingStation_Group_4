@@ -1,6 +1,7 @@
+
 package org.example;
+
 import io.cucumber.datatable.DataTable;
-import io.cucumber.java.PendingException;
 import io.cucumber.java.en.*;
 
 import java.util.List;
@@ -13,6 +14,10 @@ public class StepDefinitions {
     private EVChargingNetwork network;
     private double returnedBalance;
 
+    // New variables for Owner requirements
+    private OwnerAccountSteps ownerAccountSteps;
+    private List<Customer> returnedAccounts;
+
     private CustomerManager customers() {
         return network.getCustomerManager();
     }
@@ -20,7 +25,15 @@ public class StepDefinitions {
     @Given("the EV Charging Network {string} is in operation")
     public void theEvChargingNetworkIsInOperation(String networkName) {
         network = new EVChargingNetwork(networkName);
+
+        // Initialize Owner functionality
+        ownerAccountSteps =
+                new OwnerAccountSteps(network.getCustomerManager());
     }
+
+    // ==========================================
+    // EXISTING CUSTOMER STEP DEFINITIONS
+    // ==========================================
 
     @When("the Customer {string} completes the Registration")
     public void theCustomerCompletesTheRegistration(String name) {
@@ -34,7 +47,10 @@ public class StepDefinitions {
 
     @Then("the Account Balance of the Customer {string} is {double} EUR")
     public void theAccountBalanceOfTheCustomerIs(String name, Double expected) {
-        assertThat(customers().readCustomer(name).getPrepaidAccount().getBalance()).isEqualTo(expected);
+        assertThat(customers()
+                .readCustomer(name)
+                .getPrepaidAccount()
+                .getBalance()).isEqualTo(expected);
     }
 
     @Given("the Customer {string} is registered in the EV Charging Network")
@@ -44,7 +60,10 @@ public class StepDefinitions {
 
     @When("the Customer {string} tops up {double} EUR")
     public void theCustomerTopsUp(String name, Double amount) {
-        customers().readCustomer(name).getPrepaidAccount().topUp(amount);
+        customers()
+                .readCustomer(name)
+                .getPrepaidAccount()
+                .topUp(amount);
     }
 
     @When("the following Customers complete the Registration:")
@@ -57,17 +76,57 @@ public class StepDefinitions {
     }
 
     @Then("the number of registered Customers is {int}")
-    public void theNumberOfRegisteredCustomersIs(int expected){
-        assertThat(customers().getRegisteredCustomers()).isEqualTo(expected);
+    public void theNumberOfRegisteredCustomersIs(int expected) {
+        assertThat(customers().getRegisteredCustomers())
+                .isEqualTo(expected);
     }
 
     @When("the Customer {string} requests the Account Balance")
     public void theCustomerRequestsTheAccountBalance(String name) {
-        returnedBalance = customers().readCustomer(name).getPrepaidAccount().getBalance();
+        returnedBalance = customers()
+                .readCustomer(name)
+                .getPrepaidAccount()
+                .getBalance();
     }
 
     @Then("an Account Balance of {double} EUR is returned")
     public void anAccountBalanceOfEURIsReturned(double expected) {
+        assertEquals(expected, returnedBalance, 0.001);
+    }
+
+    // ==========================================
+    // NEW: EP-8 OWNER CUSTOMER ACCOUNT MANAGEMENT
+    // ==========================================
+
+    // US-8.1: Access registered prepaid accounts
+
+    @When("the Owner requests all registered Prepaid Accounts")
+    public void ownerRequestsAllRegisteredPrepaidAccounts() {
+        returnedAccounts = ownerAccountSteps.getRegisteredAccounts();
+    }
+
+    @Then("the Owner receives {int} Prepaid Accounts")
+    public void ownerReceivesPrepaidAccounts(int expected) {
+        assertThat(returnedAccounts).hasSize(expected);
+    }
+
+    @Then("the Owner can access the Prepaid Account of {string}")
+    public void ownerCanAccessPrepaidAccount(String name) {
+        assertThat(returnedAccounts)
+                .anyMatch(customer ->
+                        customer.getName().equals(name)
+                                && customer.getPrepaidAccount() != null);
+    }
+
+    // US-8.2: See each customer's current account balance
+
+    @When("the Owner requests the Account Balance of {string}")
+    public void ownerRequestsAccountBalance(String name) {
+        returnedBalance = ownerAccountSteps.getCustomerBalance(name);
+    }
+
+    @Then("the Owner receives an Account Balance of {double} EUR")
+    public void ownerReceivesAccountBalance(double expected) {
         assertEquals(expected, returnedBalance, 0.001);
     }
 }

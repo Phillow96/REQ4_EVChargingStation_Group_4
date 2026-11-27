@@ -1,6 +1,5 @@
 package org.example;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,8 +9,12 @@ public class CustomerManager {
     private int registeredCustomers;
 
     public CustomerManager(){
-        this.customers = new ArrayList<Customer>();
+        this.customers = new ArrayList<>();
         this.registeredCustomers = 0;
+    }
+
+    public List<Customer> getAllCustomers() {
+        return new ArrayList<>(customers);
     }
 
     public int getRegisteredCustomers() {
