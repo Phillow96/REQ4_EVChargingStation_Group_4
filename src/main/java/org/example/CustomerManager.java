@@ -7,20 +7,22 @@ import java.util.List;
 public class CustomerManager {
 
     protected ArrayList<Customer> customers;
-    private int registeredCustomers;
 
     public CustomerManager(){
         this.customers = new ArrayList<Customer>();
-        this.registeredCustomers = 0;
     }
 
     public int getRegisteredCustomers() {
-        return this.registeredCustomers;
+        return this.customers.size();
     }
 
-    public void registerCustomer(String name) {
-        this.customers.add(new Customer(name));
-        this.registeredCustomers += 1;
+    public CustomerManager registerCustomer(String name) {
+        Customer customer = new Customer(name);
+        if (holdsCustomer((customer.getName()))) {
+            throw new ChargingNetworkException("Customer is already registered");
+        }
+        this.customers.add(customer);
+        return this;
     }
 
     public boolean holdsCustomer(String name) {
@@ -38,7 +40,16 @@ public class CustomerManager {
                 return c;
             }
         }
-        return null;
+        throw new ChargingNetworkException("Unknown Customer");
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder text = new StringBuilder("CustomerManager [" + customers.size() + "Customers]");
+        for (Customer c : customers) {
+            text.append("\n ").append(c);
+        }
+        return text.toString();
     }
 
 }
