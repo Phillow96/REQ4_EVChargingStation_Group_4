@@ -31,6 +31,9 @@ public class Main {
         pointManager.createChargingPoint("CP-03", "AC", floridsdorf);
         pointManager.createChargingPoint("CP-04", "DC", floridsdorf);
 
+        pointManager.updateChargingState("CP-02", "occupied");
+        pointManager.updateChargingState("CP-03", "out of order");
+
 
         System.out.println("Welcome to the EV-Charging Network: " + network.getNetworkName());
         System.out.println();
@@ -41,6 +44,8 @@ public class Main {
         System.out.println("2 -> Exit");
         System.out.println("3 -> View Charging Locations");
         System.out.println("4 -> View Charging Points of a Charging Location");
+        System.out.println("5 -> View Charging State of a Charging Point");
+
 
         System.out.print("Enter a number here: ");
         int input = sc.nextInt();
@@ -84,6 +89,19 @@ public class Main {
                     }
                 } else {
                     System.out.println("Unknown Charging Location.");
+                }
+                break;
+            case 5:
+                sc.nextLine();
+
+                System.out.print("Enter the name of the Charging Point: ");
+                String pointName = sc.nextLine();
+
+                try {
+                    System.out.println("Charging State: "
+                            + pointManager.readChargingState(pointName));
+                } catch (IllegalArgumentException e) {
+                    System.out.println(e.getMessage());
                 }
                 break;
             default:

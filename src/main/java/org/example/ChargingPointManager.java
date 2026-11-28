@@ -31,6 +31,28 @@ public class ChargingPointManager {
         return null;
     }
 
+    public String readChargingState(String name) {
+
+        ChargingPoint point = readChargingPoint(name);
+
+        if (point == null) {
+            throw new IllegalArgumentException("Unknown Charging Point");
+        }
+
+        return point.getChargingState();
+    }
+
+    public ChargingPointManager updateChargingState(String name, String state) {
+
+        ChargingPoint point = readChargingPoint(name);
+
+        if (point != null) {
+            point.setChargingState(state);
+        }
+
+        return this;
+    }
+
     public List<ChargingPoint> readChargingPoints(ChargingLocation location) {
         return location.getChargingPoints();
     }

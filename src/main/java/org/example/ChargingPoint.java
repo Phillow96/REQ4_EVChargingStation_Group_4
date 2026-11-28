@@ -13,6 +13,10 @@ public class ChargingPoint {
         this.chargingState = "available";
     }
 
+    public void setChargingState(String chargingState) {
+        this.chargingState = chargingState;
+    }
+
     public String getName() {
         return this.name;
     }
