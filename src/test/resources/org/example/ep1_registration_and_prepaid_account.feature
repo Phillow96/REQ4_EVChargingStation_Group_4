@@ -22,7 +22,6 @@ Feature: EP-1 Registration and Prepaid Account
   @US-1.1 @create
   Scenario: Registration of five Customers
     When the following Customers complete the Registration:
-      | Customer     |
       | Anna Berger  |
       | Ada Lovelace |
       | Max Muster   |

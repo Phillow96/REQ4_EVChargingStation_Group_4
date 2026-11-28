@@ -46,18 +46,22 @@ public class StepDefinitions {
     // ===================== WHEN =====================
     @When("the Customer {string} requests the Account Balance")
     public void theCustomerRequestsTheAccountBalance(String name) {
-        returnedBalance = customers().readCustomer(name).getPrepaidAccount().getBalance();
+        capture(() -> returnedBalance =
+                customers().readCustomer(name).getPrepaidAccount().getBalance());
     }
 
     @When("the Customer {string} completes the Registration")
-    public void theCustomerCompletesTheRegistration(String name) {
-        capture(() -> customers().registerCustomer(name));
+    public void theCustomerCompletesTheRegistration(DataTable table) {
+        capture(() -> {
+            for (String name : table.asList(String.class)) {
+                customers().registerCustomer(name);
+            }
+        });
     }
 
     @When("the Customer {string} tops up {double} EUR")
     public void theCustomerTopsUp(String name, Double amount) {
         capture(() -> customers().readCustomer(name).getPrepaidAccount().topUp(amount));
-        returnedBalance = customers().readCustomer(name).getPrepaidAccount().getBalance();
     }
 
     @When("the following Customers complete the Registration:")
