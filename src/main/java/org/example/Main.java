@@ -65,6 +65,7 @@ public class Main {
         System.out.println("4 -> View Charging Points of a Charging Location");
         System.out.println("5 -> View Charging State of a Charging Point");
         System.out.println("6 -> View Current Pricing Rates");
+        System.out.println("7 -> View Charging Location Details");
 
 
         System.out.print("Enter a number here: ");
@@ -138,6 +139,38 @@ public class Main {
                             pricingRatesManager.getCurrentPricingRates(pricingLocation);
 
                     System.out.println(rates);
+
+                } catch (IllegalArgumentException e) {
+                    System.out.println(e.getMessage());
+                }
+                break;
+            case 7:
+                sc.nextLine();
+
+                System.out.print("Enter the name of the Charging Location: ");
+                String detailsLocationName = sc.nextLine();
+
+                try {
+                    ChargingLocationDetails details =
+                            network.readChargingLocationDetails(detailsLocationName);
+
+                    System.out.println("\nCharging Location: "
+                            + details.getLocation().getName());
+
+                    System.out.println("Address: "
+                            + details.getLocation().getAddress());
+
+                    System.out.println("\nCharging Points:");
+
+                    for (ChargingPoint chargingPoint : details.getChargingPoints()) {
+
+                        System.out.println(chargingPoint.getName()
+                                + " - " + chargingPoint.getChargingMode()
+                                + " - " + chargingPoint.getChargingState());
+                    }
+
+                    System.out.println("\nCurrent Pricing Rates:");
+                    System.out.println(details.getPricingRates());
 
                 } catch (IllegalArgumentException e) {
                     System.out.println(e.getMessage());

@@ -134,6 +134,56 @@ Feature: Find Charging Location and Check Charging State
   # US-2.5 - View Charging Locations on an interactive map
   # TODO: Clarify the scope of this User Story.
 
+  # US-2.6 - View the details of a Charging Location
+
+  @US2.6 @MVP1
+  Scenario: View details of a Charging Location
+    Given the Charging Location "Vienna Central" with Address "Test Street 1" exists
+    And the Charging Location has the following Charging Points:
+      | Charging Point | Charging Mode |
+      | CP-01          | AC            |
+      | CP-02          | DC            |
+    And the Charging Location has the following Pricing Rates:
+      | Charging Mode | Energy Rate | Parking Rate |
+      | AC            | 0.35        | 0.02         |
+      | DC            | 0.55        | 0.05         |
+    When the Customer requests the details of "Vienna Central"
+    Then the Address is "Test Street 1"
+    And 2 Charging Points are returned
+    And the Charging Point "CP-01" with Charging Mode "AC" is returned
+    And the Charging Point "CP-02" with Charging Mode "DC" is returned
+    And the following Pricing Rates are returned:
+      | Charging Mode | Energy Rate | Parking Rate |
+      | AC            | 0.35        | 0.02         |
+      | DC            | 0.55        | 0.05         |
+
+  @US2.6 @MVP1
+  Scenario: View details of a specific Charging Location
+    Given the Charging Location "Vienna Central" with Address "Test Street 1" exists
+    And the Charging Location has the following Charging Points:
+      | Charging Point | Charging Mode |
+      | CP-01          | AC            |
+    And the Charging Location has the following Pricing Rates:
+      | Charging Mode | Energy Rate | Parking Rate |
+      | AC            | 0.35        | 0.02         |
+      | DC            | 0.55        | 0.05         |
+    And the Charging Location "Vienna Floridsdorf" with Address "Test Street 2" exists
+    And the Charging Location has the following Charging Points:
+      | Charging Point | Charging Mode |
+      | CP-03          | DC            |
+    And the Charging Location has the following Pricing Rates:
+      | Charging Mode | Energy Rate | Parking Rate |
+      | AC            | 0.40        | 0.03         |
+      | DC            | 0.60        | 0.06         |
+    When the Customer requests the details of "Vienna Floridsdorf"
+    Then the Address is "Test Street 2"
+    And 1 Charging Points are returned
+    And the Charging Point "CP-03" with Charging Mode "DC" is returned
+    And the following Pricing Rates are returned:
+      | Charging Mode | Energy Rate | Parking Rate |
+      | AC            | 0.40        | 0.03         |
+      | DC            | 0.60        | 0.06         |
+
   # Error Cases
 
   @US2.1 @MVP1 @error
@@ -156,3 +206,8 @@ Feature: Find Charging Location and Check Charging State
     Given the Charging Location "Vienna Central" exists
     When the Customer requests the Pricing Rates of "Vienna Central"
     Then an error message "No valid Pricing Rates" is returned
+
+  @US2.6 @MVP1 @error
+  Scenario: Request details of an unknown Charging Location
+    When the Customer requests the details of "Unknown Location"
+    Then an error message "Unknown Charging Location" is returned

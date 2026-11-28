@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.List;
+
 public class EVChargingNetwork {
 
     private String networkName;
@@ -31,6 +33,21 @@ public class EVChargingNetwork {
 
     public PricingRatesManager getPricingRatesManager() {
         return this.pricingRatesManager;
+    }
+
+    public ChargingLocationDetails readChargingLocationDetails(String name) {
+
+        ChargingLocation location =
+                chargingLocationManager.readChargingLocation(name);
+
+        List<ChargingPoint> chargingPoints =
+                chargingPointManager.readChargingPoints(location);
+
+        PricingRates rates =
+                pricingRatesManager.getCurrentPricingRates(location);
+
+        return new ChargingLocationDetails(
+                location, chargingPoints, rates);
     }
 
     public String getNetworkName() {

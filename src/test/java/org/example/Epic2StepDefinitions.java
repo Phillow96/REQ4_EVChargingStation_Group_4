@@ -18,6 +18,7 @@ public class Epic2StepDefinitions {
     private ChargingLocationManager manager;
     private ChargingPointManager pointManager;
     private PricingRatesManager pricingRatesManager;
+    private EVChargingNetwork network;
 
     // Selected objects
     private ChargingLocation selectedLocation;
@@ -28,13 +29,14 @@ public class Epic2StepDefinitions {
     private String chargingStateResult;
     private String errorMessage;
     private PricingRates pricingRatesResult;
+    private ChargingLocationDetails locationDetailsResult;
 
 
     // Background
 
     @Given("an EV Charging Network")
     public void createNetwork() {
-        EVChargingNetwork network = new EVChargingNetwork("Vienna EV Power");
+        network = new EVChargingNetwork("Vienna EV Power");
 
         manager = network.getChargingLocationManager();
         pointManager = network.getChargingPointManager();
@@ -263,6 +265,42 @@ public class Epic2StepDefinitions {
 
             pricingRatesManager.createPricingRates(selectedLocation, rates);
         }
+    }
+
+    // US-2.6 - View Charging Location Details
+    @Given("the Charging Location {string} with Address {string} exists")
+    public void createChargingLocationWithAddress(String name, String address) {
+
+        manager.createChargingLocation(name, address);
+
+        selectedLocation = manager.readChargingLocation(name);
+    }
+
+    @When("the Customer requests the details of {string}")
+    public void requestLocationDetails(String name) {
+
+        try {
+            locationDetailsResult =
+                    network.readChargingLocationDetails(name);
+
+            chargingPointResult =
+                    locationDetailsResult.getChargingPoints();
+
+            pricingRatesResult =
+                    locationDetailsResult.getPricingRates();
+
+        } catch (IllegalArgumentException e) {
+            errorMessage = e.getMessage();
+        }
+    }
+
+    @Then("the Address is {string}")
+    public void checkAddress(String expectedAddress) {
+
+        assertThat(locationDetailsResult).isNotNull();
+
+        assertThat(locationDetailsResult.getLocation().getAddress())
+                .isEqualTo(expectedAddress);
     }
 
     // Error Cases
