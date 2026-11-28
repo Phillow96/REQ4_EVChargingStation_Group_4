@@ -19,6 +19,8 @@ Feature: Find Charging Location and Check Charging State
       | Vienna Floridsdorf |
     When the Customer requests all Charging Locations
     Then 2 Charging Locations are returned
+    And the Charging Location "Vienna Central" is returned
+    And the Charging Location "Vienna Floridsdorf" is returned
 
   @US2.1 @MVP1
   Scenario: View Charging Points of a Charging Location
@@ -29,6 +31,8 @@ Feature: Find Charging Location and Check Charging State
       | CP-02          | DC            |
     When the Customer requests the Charging Points of "Vienna Central"
     Then 2 Charging Points are returned
+    And the Charging Point "CP-01" with Charging Mode "AC" is returned
+    And the Charging Point "CP-02" with Charging Mode "DC" is returned
 
   # US-2.2 - View the Charging State
 
