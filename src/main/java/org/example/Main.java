@@ -1,6 +1,7 @@
 package org.example;
 
 import java.util.Scanner;
+import java.time.LocalDateTime;
 
 public class Main {
     public static void main(String[] args) {
@@ -34,6 +35,24 @@ public class Main {
         pointManager.updateChargingState("CP-02", "occupied");
         pointManager.updateChargingState("CP-03", "out of order");
 
+        PricingRatesManager pricingRatesManager =
+                network.getPricingRatesManager();
+
+        pricingRatesManager.createPricingRates(
+                locationManager.readChargingLocation("Vienna Central"),
+                new PricingRates(
+                        "PR-01",
+                        LocalDateTime.now().minusHours(2),
+                        0.35, 0.55, 0.02, 0.05)
+        );
+
+        pricingRatesManager.createPricingRates(
+                locationManager.readChargingLocation("Vienna Floridsdorf"),
+                new PricingRates(
+                        "PR-02",
+                        LocalDateTime.now().minusHours(2),
+                        0.40, 0.60, 0.03, 0.06)
+        );
 
         System.out.println("Welcome to the EV-Charging Network: " + network.getNetworkName());
         System.out.println();
@@ -45,6 +64,7 @@ public class Main {
         System.out.println("3 -> View Charging Locations");
         System.out.println("4 -> View Charging Points of a Charging Location");
         System.out.println("5 -> View Charging State of a Charging Point");
+        System.out.println("6 -> View Current Pricing Rates");
 
 
         System.out.print("Enter a number here: ");
@@ -100,6 +120,25 @@ public class Main {
                 try {
                     System.out.println("Charging State: "
                             + pointManager.readChargingState(pointName));
+                } catch (IllegalArgumentException e) {
+                    System.out.println(e.getMessage());
+                }
+                break;
+            case 6:
+                sc.nextLine();
+
+                System.out.print("Enter the name of the Charging Location: ");
+                String pricingLocationName = sc.nextLine();
+
+                ChargingLocation pricingLocation =
+                        locationManager.readChargingLocation(pricingLocationName);
+
+                try {
+                    PricingRates rates =
+                            pricingRatesManager.getCurrentPricingRates(pricingLocation);
+
+                    System.out.println(rates);
+
                 } catch (IllegalArgumentException e) {
                     System.out.println(e.getMessage());
                 }

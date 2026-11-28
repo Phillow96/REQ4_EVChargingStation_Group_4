@@ -60,22 +60,46 @@ Feature: Find Charging Location and Check Charging State
   Scenario: View Pricing Rates of a Charging Location
     Given the Charging Location "Vienna Central" exists
     And the Charging Location has the following Pricing Rates:
-      | Charging Mode | Energy Rate | Time Rate |
-      | AC            | 0.35        | 0.02      |
-      | DC            | 0.55        | 0.05      |
+      | Charging Mode | Energy Rate | Parking Rate |
+      | AC            | 0.35        | 0.02         |
+      | DC            | 0.55        | 0.05         |
     When the Customer requests the Pricing Rates of "Vienna Central"
     Then the following Pricing Rates are returned:
-      | Charging Mode | Energy Rate | Time Rate |
-      | AC            | 0.35        | 0.02      |
-      | DC            | 0.55        | 0.05      |
+      | Charging Mode | Energy Rate | Parking Rate |
+      | AC            | 0.35        | 0.02         |
+      | DC            | 0.55        | 0.05         |
 
   @US2.3 @MVP2
   Scenario: Pricing Rates differ between Charging Locations
-    Given the Charging Location "Vienna Central" has an AC Energy Rate of 0.35 EUR
-    And the Charging Location "Vienna Floridsdorf" has an AC Energy Rate of 0.40 EUR
-    When the Customer requests the AC Energy Rates
-    Then the Energy Rate of "Vienna Central" is 0.35 EUR
-    And the Energy Rate of "Vienna Floridsdorf" is 0.40 EUR
+    Given the Charging Location "Vienna Central" exists
+    And the Charging Location has the following Pricing Rates:
+      | Charging Mode | Energy Rate | Parking Rate |
+      | AC            | 0.35        | 0.02         |
+      | DC            | 0.55        | 0.05         |
+    And the Charging Location "Vienna Floridsdorf" exists
+    And the Charging Location has the following Pricing Rates:
+      | Charging Mode | Energy Rate | Parking Rate |
+      | AC            | 0.40        | 0.03         |
+      | DC            | 0.60        | 0.06         |
+    When the Customer requests the Pricing Rates of "Vienna Floridsdorf"
+    Then the following Pricing Rates are returned:
+      | Charging Mode | Energy Rate | Parking Rate |
+      | AC            | 0.40        | 0.03         |
+      | DC            | 0.60        | 0.06         |
+
+  @US2.3 @MVP2
+  Scenario: View the currently valid Pricing Rates
+    Given the Charging Location "Vienna Central" exists
+    And the Charging Location has the following scheduled Pricing Rates:
+      | Pricing Rates ID | Valid From Offset | AC Energy Rate | DC Energy Rate | AC Parking Rate | DC Parking Rate |
+      | PR-01            | -120              | 0.35           | 0.55           | 0.02            | 0.05            |
+      | PR-03            | 60                | 0.55           | 0.75           | 0.04            | 0.07            |
+      | PR-02            | -60               | 0.45           | 0.65           | 0.03            | 0.06            |
+    When the Customer requests the Pricing Rates of "Vienna Central"
+    Then the following Pricing Rates are returned:
+      | Charging Mode | Energy Rate | Parking Rate |
+      | AC            | 0.45        | 0.03         |
+      | DC            | 0.65        | 0.06         |
 
   # US-2.4 - Filter Charging Points
 
@@ -121,3 +145,14 @@ Feature: Find Charging Location and Check Charging State
   Scenario: Request an unknown Charging Point
     When the Customer requests the Charging State of "CP-99"
     Then an error message "Unknown Charging Point" is returned
+
+  @US2.3 @MVP2 @error
+  Scenario: Request Pricing Rates of an unknown Charging Location
+    When the Customer requests the Pricing Rates of "Unknown Location"
+    Then an error message "Unknown Charging Location" is returned
+
+  @US2.3 @MVP2 @error
+  Scenario: Request Pricing Rates of a Charging Location without valid rates
+    Given the Charging Location "Vienna Central" exists
+    When the Customer requests the Pricing Rates of "Vienna Central"
+    Then an error message "No valid Pricing Rates" is returned

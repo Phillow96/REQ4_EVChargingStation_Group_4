@@ -8,6 +8,7 @@ import io.cucumber.datatable.DataTable;
 
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,6 +17,7 @@ public class Epic2StepDefinitions {
     // Managers
     private ChargingLocationManager manager;
     private ChargingPointManager pointManager;
+    private PricingRatesManager pricingRatesManager;
 
     // Selected objects
     private ChargingLocation selectedLocation;
@@ -25,6 +27,7 @@ public class Epic2StepDefinitions {
     private List<ChargingPoint> chargingPointResult;
     private String chargingStateResult;
     private String errorMessage;
+    private PricingRates pricingRatesResult;
 
 
     // Background
@@ -35,6 +38,7 @@ public class Epic2StepDefinitions {
 
         manager = network.getChargingLocationManager();
         pointManager = network.getChargingPointManager();
+        pricingRatesManager = network.getPricingRatesManager();
     }
 
 
@@ -156,6 +160,109 @@ public class Epic2StepDefinitions {
     public void checkChargingState(String expectedState) {
 
         assertThat(chargingStateResult).isEqualTo(expectedState);
+    }
+
+    // US-2.3 - View Current Pricing Rates
+
+    @Given("the Charging Location has the following Pricing Rates:")
+    public void createPricingRates(DataTable table) {
+
+        Map<String, String> ac = null;
+        Map<String, String> dc = null;
+
+        for (Map<String, String> row : table.asMaps()) {
+
+            if (row.get("Charging Mode").equals("AC")) {
+                ac = row;
+            } else if (row.get("Charging Mode").equals("DC")) {
+                dc = row;
+            }
+        }
+
+        assertThat(ac).isNotNull();
+        assertThat(dc).isNotNull();
+
+        PricingRates rates = new PricingRates(
+                "PR-" + selectedLocation.getName(),
+                LocalDateTime.now().minusMinutes(1),
+                Double.parseDouble(ac.get("Energy Rate")),
+                Double.parseDouble(dc.get("Energy Rate")),
+                Double.parseDouble(ac.get("Parking Rate")),
+                Double.parseDouble(dc.get("Parking Rate"))
+        );
+
+        pricingRatesManager.createPricingRates(selectedLocation, rates);
+    }
+
+    @When("the Customer requests the Pricing Rates of {string}")
+    public void requestPricingRates(String name) {
+
+        ChargingLocation location = manager.readChargingLocation(name);
+
+        try {
+            pricingRatesResult =
+                    pricingRatesManager.getCurrentPricingRates(location);
+        } catch (IllegalArgumentException e) {
+            errorMessage = e.getMessage();
+        }
+    }
+
+    @Then("the following Pricing Rates are returned:")
+    public void checkPricingRates(DataTable table) {
+
+        assertThat(pricingRatesResult).isNotNull();
+
+        for (Map<String, String> row : table.asMaps()) {
+
+            String mode = row.get("Charging Mode");
+
+            double energyRate =
+                    Double.parseDouble(row.get("Energy Rate"));
+
+            double parkingRate =
+                    Double.parseDouble(row.get("Parking Rate"));
+
+            if (mode.equals("AC")) {
+
+                assertThat(pricingRatesResult.getAcEnergyRate())
+                        .isEqualTo(energyRate);
+
+                assertThat(pricingRatesResult.getAcParkingRate())
+                        .isEqualTo(parkingRate);
+
+            } else if (mode.equals("DC")) {
+
+                assertThat(pricingRatesResult.getDcEnergyRate())
+                        .isEqualTo(energyRate);
+
+                assertThat(pricingRatesResult.getDcParkingRate())
+                        .isEqualTo(parkingRate);
+
+            } else {
+                throw new IllegalArgumentException("Unknown Charging Mode");
+            }
+        }
+    }
+
+    @Given("the Charging Location has the following scheduled Pricing Rates:")
+    public void createScheduledPricingRates(DataTable table) {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Map<String, String> row : table.asMaps()) {
+
+            PricingRates rates = new PricingRates(
+                    row.get("Pricing Rates ID"),
+                    now.plusMinutes(
+                            Integer.parseInt(row.get("Valid From Offset"))),
+                    Double.parseDouble(row.get("AC Energy Rate")),
+                    Double.parseDouble(row.get("DC Energy Rate")),
+                    Double.parseDouble(row.get("AC Parking Rate")),
+                    Double.parseDouble(row.get("DC Parking Rate"))
+            );
+
+            pricingRatesManager.createPricingRates(selectedLocation, rates);
+        }
     }
 
     // Error Cases
