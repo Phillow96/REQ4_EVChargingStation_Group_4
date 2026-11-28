@@ -22,6 +22,7 @@ Feature: EP-1 Registration and Prepaid Account
   @US-1.1 @create
   Scenario: Registration of five Customers
     When the following Customers complete the Registration:
+      | Customer     |
       | Anna Berger  |
       | Ada Lovelace |
       | Max Muster   |
@@ -79,7 +80,7 @@ Feature: EP-1 Registration and Prepaid Account
       Given the Customer "Anna Berger" is registered in the EV Charging Network
       When the Customer "Anna Berger" completes the Registration
       Then the request is refused with the message "Customer is already registered"
-      And the number of registered Customers is 0
+      And the number of registered Customers is 1
 
   @US-1.3 @error
     Scenario: The Account Balance of an unknown Customer is not returned

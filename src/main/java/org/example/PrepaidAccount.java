@@ -8,7 +8,7 @@ public class PrepaidAccount {
     }
 
     public PrepaidAccount topUp(Double amount) {
-        if (amount == null || amount <= 5.0) {
+        if (amount == null || amount < 5.0) {
             throw new ChargingNetworkException("A top-up needs to be at least 5.00 EUR");
         }
         this.balance += amount;

@@ -13,7 +13,6 @@ public class StepDefinitions {
 
     private EVChargingNetwork network;
     private double returnedBalance;
-    private Customer returnedCustomer;
     private String refusalMessage;
 
     private CustomerManager customers() {
@@ -34,7 +33,7 @@ public class StepDefinitions {
     @Given("the EV Charging Network {string} is in operation")
     public void theEvChargingNetworkIsInOperation(String networkName) {
         network = new EVChargingNetwork(networkName);
-        returnedCustomer = null;
+        returnedBalance = 0.0;
         refusalMessage = null;
     }
 
@@ -51,17 +50,16 @@ public class StepDefinitions {
     }
 
     @When("the Customer {string} completes the Registration")
-    public void theCustomerCompletesTheRegistration(DataTable table) {
-        capture(() -> {
-            for (String name : table.asList(String.class)) {
-                customers().registerCustomer(name);
-            }
+    public void theCustomerCompletesTheRegistration(String name) {
+        capture(() -> { customers().registerCustomer(name);
         });
     }
 
     @When("the Customer {string} tops up {double} EUR")
     public void theCustomerTopsUp(String name, Double amount) {
-        capture(() -> customers().readCustomer(name).getPrepaidAccount().topUp(amount));
+        capture(() ->
+                customers().readCustomer(name).getPrepaidAccount().topUp(amount));
+                returnedBalance = customers().readCustomer(name).getPrepaidAccount().getBalance();
     }
 
     @When("the following Customers complete the Registration:")
