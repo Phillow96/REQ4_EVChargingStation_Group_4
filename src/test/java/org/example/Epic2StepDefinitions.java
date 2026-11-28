@@ -16,11 +16,14 @@ public class Epic2StepDefinitions {
     private List<ChargingLocation> result;
     private ChargingLocation selectedLocation;
     private List<ChargingPoint> chargingPointResult;
+    private ChargingPointManager pointManager;
 
     @Given("an EV Charging Network")
     public void createNetwork() {
         EVChargingNetwork network = new EVChargingNetwork("Vienna EV Power");
+
         manager = network.getChargingLocationManager();
+        pointManager = network.getChargingPointManager();
     }
 
     @Given("the following Charging Locations exist:")
@@ -28,29 +31,33 @@ public class Epic2StepDefinitions {
 
         for (Map<String, String> row : table.asMaps()) {
             manager.createChargingLocation(
-                    row.get("Charging Location"));
+                    row.get("Charging Location"),
+                    row.get("Address"));
         }
     }
 
     @Given("the Charging Location {string} exists")
     public void createChargingLocation(String name) {
-        manager.createChargingLocation(name);
+        manager.createChargingLocation(name, "Test Street 1");
         selectedLocation = manager.readChargingLocation(name);
     }
 
     @Given("the Charging Location has the following Charging Points:")
     public void addChargingPoints(DataTable table) {
+
         for (Map<String, String> row : table.asMaps()) {
-            selectedLocation.addChargingPoint(
+            pointManager.createChargingPoint(
                     row.get("Charging Point"),
-                    row.get("Charging Mode"));
+                    row.get("Charging Mode"),
+                    selectedLocation);
         }
     }
 
     @When("the Customer requests the Charging Points of {string}")
     public void requestChargingPoints(String name) {
+
         ChargingLocation location = manager.readChargingLocation(name);
-        chargingPointResult = location.getChargingPoints();
+        chargingPointResult = pointManager.readChargingPoints(location);
     }
 
     @Then("{int} Charging Points are returned")
@@ -60,7 +67,7 @@ public class Epic2StepDefinitions {
 
     @When("the Customer requests all Charging Locations")
     public void requestChargingLocations() {
-        result = manager.getChargingLocations();
+        result = manager.readChargingLocations();
     }
 
     @Then("the Charging Location {string} is returned")
@@ -78,12 +85,12 @@ public class Epic2StepDefinitions {
     }
 
     @Then("the Charging Point {string} with Charging Mode {string} is returned")
-    public void checkChargingPoint(String id, String chargingMode) {
+    public void checkChargingPoint(String name, String chargingMode) {
 
         boolean found = false;
 
         for (ChargingPoint point : chargingPointResult) {
-            if (point.getId().equals(id)
+            if (point.getName().equals(name)
                     && point.getChargingMode().equals(chargingMode)) {
                 found = true;
             }

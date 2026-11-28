@@ -1,6 +1,8 @@
 package org.example;
 
+import java.util.List;
 import java.util.ArrayList;
+
 
 public class ChargingLocationManager {
 
@@ -10,11 +12,12 @@ public class ChargingLocationManager {
         this.chargingLocations = new ArrayList<>();
     }
 
-    public void createChargingLocation(String name) {
-        this.chargingLocations.add(new ChargingLocation(name));
+    public ChargingLocationManager createChargingLocation(String name, String address) {
+        this.chargingLocations.add(new ChargingLocation(name, address));
+        return this;
     }
 
-    public ArrayList<ChargingLocation> getChargingLocations() {
+    public List<ChargingLocation> readChargingLocations() {
         return this.chargingLocations;
     }
 
@@ -29,5 +32,10 @@ public class ChargingLocationManager {
             }
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return this.chargingLocations.toString();
     }
 }

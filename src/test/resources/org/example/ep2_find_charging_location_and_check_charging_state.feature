@@ -14,9 +14,9 @@ Feature: Find Charging Location and Check Charging State
   @US2.1 @MVP1
   Scenario: View all Charging Locations
     Given the following Charging Locations exist:
-      | Charging Location  |
-      | Vienna Central     |
-      | Vienna Floridsdorf |
+      | Charging Location  | Address       |
+      | Vienna Central     | Test Street 1 |
+      | Vienna Floridsdorf | Test Street 2 |
     When the Customer requests all Charging Locations
     Then 2 Charging Locations are returned
     And the Charging Location "Vienna Central" is returned
