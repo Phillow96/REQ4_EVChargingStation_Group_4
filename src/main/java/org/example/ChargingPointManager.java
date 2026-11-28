@@ -54,6 +54,11 @@ public class ChargingPointManager {
     }
 
     public List<ChargingPoint> readChargingPoints(ChargingLocation location) {
+
+        if (location == null) {
+            throw new IllegalArgumentException("Unknown Charging Location");
+        }
+
         return location.getChargingPoints();
     }
 }

@@ -98,7 +98,12 @@ public class Epic2StepDefinitions {
     public void requestChargingPoints(String name) {
 
         ChargingLocation location = manager.readChargingLocation(name);
-        chargingPointResult = pointManager.readChargingPoints(location);
+
+        try {
+            chargingPointResult = pointManager.readChargingPoints(location);
+        } catch (IllegalArgumentException e) {
+            errorMessage = e.getMessage();
+        }
     }
 
     @Then("{int} Charging Points are returned")

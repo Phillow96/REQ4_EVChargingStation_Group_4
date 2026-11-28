@@ -81,14 +81,14 @@ public class Main {
                 ChargingLocation selectedLocation =
                         locationManager.readChargingLocation(locationName);
 
-                if (selectedLocation != null) {
-                    System.out.println("Charging Points:");
+                try {
+                    for (ChargingPoint chargingPoint :
+                            pointManager.readChargingPoints(selectedLocation)) {
 
-                    for (ChargingPoint point : pointManager.readChargingPoints(selectedLocation)) {
-                        System.out.println(point);
+                        System.out.println(chargingPoint);
                     }
-                } else {
-                    System.out.println("Unknown Charging Location.");
+                } catch (IllegalArgumentException e) {
+                    System.out.println(e.getMessage());
                 }
                 break;
             case 5:
